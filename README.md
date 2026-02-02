@@ -72,7 +72,7 @@ npm install
 # DB_NAME=school_system
 # JWT_SECRET=votre_secret
 # SESSION_SECRET=un_autre_secret
-# EMAIL_USER=systemscolaire34@gmail.com
+# EMAIL_USER=votre_email
 # EMAIL_PASS=votre_mot_de_passe_application_gmail
 npm run dev
 ```
