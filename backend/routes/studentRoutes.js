@@ -9,5 +9,6 @@ router.post('/', auth, studentController.createStudent);
 router.get('/:id', auth, studentController.getStudentById);
 router.put('/:id', auth, studentController.updateStudent);
 router.delete('/:id', auth, studentController.deleteStudent);
+router.post('/change-password', auth, studentController.changePassword);
 
 module.exports = router;

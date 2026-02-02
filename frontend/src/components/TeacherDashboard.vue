@@ -36,15 +36,44 @@
     <div class="actions-bar">
       <router-link to="/students" class="action-btn">Gérer les Élèves</router-link>
       <router-link to="/courses" class="action-btn secondary">Gérer les Cours</router-link>
+      <button @click="showPasswordModal = true" class="action-btn password">Changer mot de passe</button>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div v-if="showPasswordModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Changer mon mot de passe</h3>
+            <form @submit.prevent="handleChangePassword">
+                <div class="form-group">
+                    <label>Mot de passe actuel</label>
+                    <input v-model="passForm.currentPassword" type="password" required />
+                </div>
+                <div class="form-group">
+                    <label>Nouveau mot de passe</label>
+                    <input v-model="passForm.newPassword" type="password" required />
+                </div>
+                <div class="form-group">
+                    <label>Confirmer nouveau mot de passe</label>
+                    <input v-model="passForm.confirmPassword" type="password" required />
+                </div>
+                <div class="modal-actions">
+                    <button type="button" @click="showPasswordModal = false" class="btn-secondary">Annuler</button>
+                    <button type="submit" class="btn-primary" :disabled="submitting">Enregistrer</button>
+                </div>
+            </form>
+            <p v-if="passError" class="error-text">{{ passError }}</p>
+            <p v-if="passSuccess" class="success-text">{{ passSuccess }}</p>
+        </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import studentService from '../services/studentService';
 import performanceService from '../services/performanceService';
 import absenceService from '../services/absenceService';
+import api from '../services/api';
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 import ruleEngine from '../services/ruleEngine';
@@ -59,6 +88,17 @@ const chartData = ref({});
 const chartOptions = ref({
   responsive: true,
   maintainAspectRatio: true
+});
+
+// Password Change State
+const showPasswordModal = ref(false);
+const submitting = ref(false);
+const passError = ref('');
+const passSuccess = ref('');
+const passForm = reactive({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
 });
 
 const loadStats = async () => {
@@ -110,6 +150,34 @@ const loadStats = async () => {
   }
 };
 
+const handleChangePassword = async () => {
+    if (passForm.newPassword !== passForm.confirmPassword) {
+        passError.value = "Les nouveaux mots de passe ne correspondent pas.";
+        return;
+    }
+    
+    submitting.value = true;
+    passError.value = '';
+    passSuccess.value = '';
+    
+    try {
+        await api.post('/users/change-password', {
+            currentPassword: passForm.currentPassword,
+            newPassword: passForm.newPassword
+        });
+        passSuccess.value = "Mot de passe modifié avec succès.";
+        setTimeout(() => {
+            showPasswordModal.value = false;
+            Object.assign(passForm, { currentPassword: '', newPassword: '', confirmPassword: '' });
+            passSuccess.value = '';
+        }, 2000);
+    } catch (err) {
+        passError.value = err.response?.data?.message || "Erreur lors du changement de mot de passe.";
+    } finally {
+        submitting.value = false;
+    }
+};
+
 onMounted(loadStats);
 </script>
 
@@ -131,6 +199,19 @@ onMounted(loadStats);
 .alert-item.info { background: #d1ecf1; border-left-color: #17a2b8; color: #0c5460; }
 
 .actions-bar { display: flex; gap: 1rem; margin-top: 2rem; }
-.actions-bar .action-btn { flex: 1; text-align: center; padding: 1rem; border-radius: 8px; color: white; background: #007bff; text-decoration: none; font-weight: bold; }
+.actions-bar .action-btn { flex: 1; text-align: center; padding: 1rem; border-radius: 8px; color: white; background: #007bff; text-decoration: none; font-weight: bold; border: none; cursor: pointer; }
 .actions-bar .action-btn.secondary { background: #28a745; }
+.actions-bar .action-btn.password { background: #6c757d; }
+
+/* Modal Styles */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: white; padding: 2rem; border-radius: 8px; width: 100%; max-width: 500px; text-align: left; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; text-align: left; }
+.form-group input { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
+.btn-primary { background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.btn-secondary { background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.error-text { color: #dc3545; margin-top: 1rem; font-size: 0.9rem; }
+.success-text { color: #28a745; margin-top: 1rem; font-size: 0.9rem; }
 </style>

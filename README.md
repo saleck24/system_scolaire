@@ -1,22 +1,31 @@
-# Système de Gestion Scolaire (Offline-First)
+# # Système de Gestion Scolaire (Offline-First)
 
 Un système de gestion scolaire moderne et robuste conçu avec une architecture **Offline-First**, permettant une utilisation fluide même en cas d'instabilité réseau.
 
 ## 🚀 Fonctionnalités Clés
 
 ### 🔒 Sécurité et Accès
-- **Gestion des Rôles** : Accès différencié pour les Administrateurs et les Enseignants.
-- **Inscription Contrôlée** : Inscription restreinte au rôle 'enseignant' pour un contrôle optimal des accès.
-- **Authentification JWT** : Sécurisation des routes API par jetons JSON Web.
+- **Gestion des Rôles** : Accès différencié pour les Administrateurs, Enseignants et Élèves.
+- **Sessions Sécurisées** : Authentification basée sur des **cookies HttpOnly** et sessions serveur.
+- **Gestion des Mots de Passe** :
+  - Changement de mot de passe via l'interface utilisateur.
+  - Récupération de mot de passe oublié via **SMTP Gmail** (Nodemailer).
+- **Dernière Activité** : Suivi en temps réel de l'état "En ligne" des utilisateurs.
 
-### 📊 Tableaux de Bord Dynamiques
-- **Dashboard Enseignant** : 
-  - Statistiques globales (moyenne, nombre d'élèves).
-  - Graphiques de répartition des notes (Chart.js).
-  - **Système d'Alertes Généralisées** : Suivi automatique des difficultés (notes faibles, absences) et des succès (mentions excellentes).
-- **Dashboard Admin** :
-  - Statistiques système en temps réel.
-  - **Suivi d'Activité** : Visualisation des utilisateurs actuellement en ligne (`last_active`).
+### �‍🏫 Espace Enseignant
+- **Gestion des Élèves** : CRUD complet des élèves assignés.
+- **Saisie des Notes & Absences** : Interface rapide et intuitive.
+- **Moteur d'Alertes** : Détection automatique des élèves en difficulté ou succès.
+- **Gestion de Contenu** : Upload de cours (PDF, Vidéos, Audios).
+- **Analyses** : Graphiques de répartition des performances (Chart.js).
+
+### 🎓 Espace Élève
+- **Consultation** : Accès direct aux notes, absences et documents de cours.
+- **Profil** : Gestion sécurisée du mot de passe personnel.
+
+### 📊 Dashboard Admin
+- **Statistiques** : Vue consolidée (Total Utilisateurs, Total Élèves, Total Cours).
+- **Moniteur d'Activité** : Distinction entre Utilisateurs et Élèves en ligne.
 
 ### 📡 Architecture Offline-First & Sync
 - **Continuité de Service** : Saisie des notes et absences possible sans connexion internet.
@@ -62,6 +71,9 @@ npm install
 # DB_PASSWORD=votre_mot_de_passe
 # DB_NAME=school_system
 # JWT_SECRET=votre_secret
+# SESSION_SECRET=un_autre_secret
+# EMAIL_USER=systemscolaire34@gmail.com
+# EMAIL_PASS=votre_mot_de_passe_application_gmail
 npm run dev
 ```
 
@@ -81,4 +93,4 @@ npm run dev
 6. Les données se synchroniseront automatiquement après quelques secondes.
 
 ---
-Développé avec ❤️ pour la gestion des établissements scolaires.
+Développé pour la gestion des établissements scolaires.

@@ -9,17 +9,21 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(100) NOT NULL,
     role ENUM('admin', 'enseignant') NOT NULL,
     last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reset_token VARCHAR(255),
+    reset_token_expiry DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS students (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
-    password_hash VARCHAR(255),
     niveau VARCHAR(50),
     etablissement VARCHAR(100),
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255),
     enseignant_id INT,
+    last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reset_token VARCHAR(255),
+    reset_token_expiry DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (enseignant_id) REFERENCES users(id)
 );

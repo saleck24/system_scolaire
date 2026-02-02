@@ -16,9 +16,14 @@
           {{ loading ? 'Connexion...' : 'Se connecter' }}
         </button>
         <p v-if="error" class="error">{{ error }}</p>
-        <p class="register-link">
-          Pas de compte ? <router-link to="/register">S'inscrire</router-link>
-        </p>
+        <div class="auth-links">
+            <p class="register-link">
+            Pas de compte ? <router-link to="/register">S'inscrire</router-link>
+            </p>
+            <p class="forgot-link">
+            <router-link to="/forgot-password">Mot de passe oublié ?</router-link>
+            </p>
+        </div>
       </form>
     </div>
   </div>
@@ -97,5 +102,20 @@ button:disabled {
   color: red;
   margin-top: 1rem;
   text-align: center;
+}
+.auth-links {
+    margin-top: 1.5rem;
+}
+.register-link, .forgot-link {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+.forgot-link a {
+  color: #6c757d;
+  text-decoration: none;
+}
+.forgot-link a:hover {
+  text-decoration: underline;
 }
 </style>

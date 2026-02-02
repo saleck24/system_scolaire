@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const [users] = await db.query('SELECT id, nom, email, role, created_at FROM users');
+        const [users] = await db.query('SELECT id, nom, email, role, last_active FROM users');
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: 'Erreur serveur.' });
@@ -42,6 +42,55 @@ exports.getOnlineUsers = async (req, res) => {
         res.json(users);
     } catch (error) {
         console.error('Error fetching online users:', error);
+        res.status(500).json({ message: 'Erreur serveur.' });
+    }
+};
+
+exports.getOnlineStats = async (req, res) => {
+    try {
+        const [onlineUsers] = await db.query(
+            "SELECT id, nom, role, last_active FROM users WHERE last_active > NOW() - INTERVAL 15 MINUTE"
+        );
+        const [onlineStudents] = await db.query(
+            "SELECT id, nom, last_active FROM students WHERE last_active > NOW() - INTERVAL 15 MINUTE"
+        );
+        const [[{ totalStudents }]] = await db.query("SELECT COUNT(*) as totalStudents FROM students");
+        const [[{ totalUsers }]] = await db.query("SELECT COUNT(*) as totalUsers FROM users");
+
+        res.json({
+            onlineUsers,
+            onlineStudents,
+            totalStudents,
+            totalUsers
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erreur serveur.' });
+    }
+};
+
+exports.changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    try {
+        const userId = req.user.id;
+        const [users] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+        }
+
+        const user = users[0];
+        const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Mot de passe actuel incorrect.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await db.query('UPDATE users SET password_hash = ? WHERE id = ?', [hashedPassword, userId]);
+
+        res.json({ message: 'Mot de passe modifié avec succès.' });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Erreur serveur.' });
     }
 };

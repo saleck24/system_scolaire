@@ -4,8 +4,6 @@ const bcrypt = require('bcryptjs');
 
 exports.getAllStudents = async (req, res) => {
     try {
-        // Filter by teacher if role is 'enseignant', else admin sees all? 
-        // For simplicity, let's say teacher sees their own students.
         let query = 'SELECT * FROM students';
         const params = [];
 
@@ -78,6 +76,32 @@ exports.deleteStudent = async (req, res) => {
         await db.query('DELETE FROM students WHERE id = ? AND enseignant_id = ?', [id, req.user.id]);
         res.json({ message: 'Élève supprimé.' });
     } catch (error) {
+        res.status(500).json({ message: 'Erreur serveur.' });
+    }
+};
+
+exports.changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    try {
+        const studentId = req.user.id;
+        const [students] = await db.query('SELECT * FROM students WHERE id = ?', [studentId]);
+
+        if (students.length === 0) {
+            return res.status(404).json({ message: 'Élève non trouvé.' });
+        }
+
+        const student = students[0];
+        const isMatch = await bcrypt.compare(currentPassword, student.password_hash);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Mot de passe actuel incorrect.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await db.query('UPDATE students SET password_hash = ? WHERE id = ?', [hashedPassword, studentId]);
+
+        res.json({ message: 'Mot de passe modifié avec succès.' });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Erreur serveur.' });
     }
 };

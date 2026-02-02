@@ -2,6 +2,8 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
@@ -12,8 +14,23 @@ const compression = require('compression');
 const path = require('path');
 
 app.use(compression());
-app.use(cors());
+app.use(cookieParser());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 app.use(express.json());
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 1jour
+    }
+}));
 // Serve the uploads folder statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -31,8 +48,6 @@ app.use('/api/performances', auth, activity, performanceRoutes);
 app.use('/api/absences', auth, activity, absenceRoutes);
 app.use('/api/users', auth, activity, require('./routes/userRoutes'));
 app.use('/api/courses', auth, activity, require('./routes/courseRoutes'));
-
-
 
 app.get('/', (req, res) => {
     res.send('API Système Scolaire Offline-First Running');
