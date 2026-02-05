@@ -13,9 +13,9 @@
         <h3>Total Cours</h3>
         <p class="stat-value">{{ totalCourses }}</p>
       </div>
-      <div class="stat-card info">
+      <div class="stat-card" :class="{'info': systemStatus === 'Actif', 'error': systemStatus === 'Erreur', 'unknown': systemStatus === 'Unknown'}">
         <h3>Système</h3>
-        <p class="stat-value">Actif</p>
+        <p class="stat-value">{{ systemStatus }}</p>
       </div>
     </div>
 
@@ -103,6 +103,7 @@ const totalStudents = ref(0);
 const totalCourses = ref(0);
 const onlineUsers = ref([]);
 const onlineStudents = ref([]);
+const systemStatus = ref('Unknown');
 
 const loadStats = async () => {
   try {
@@ -114,8 +115,11 @@ const loadStats = async () => {
     
     const cRes = await api.get('/courses');
     totalCourses.value = cRes.data.length;
+    
+    systemStatus.value = 'Actif';
   } catch (error) {
     console.error('Erreur chargement stats admin:', error);
+    systemStatus.value = 'Erreur';
   }
 };
 
@@ -160,12 +164,30 @@ onMounted(loadStats);
 .stats-grid { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
 .stat-card { flex: 1; min-width: 180px; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
 .stat-card.info { border-left: 5px solid #17a2b8; }
+.stat-card.error { border-left: 5px solid #dc3545; }
+.stat-card.unknown { border-left: 5px solid #ffc107; }
 .stat-value { font-size: 2.5rem; font-weight: bold; margin: 0.5rem 0 0; color: #333; }
 .grid-container { display: flex; gap: 2rem; flex-wrap: wrap; }
 .chart-container { flex: 2; min-width: 300px; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 .actions-container { flex: 1; min-width: 200px; }
 .action-links { display: flex; flex-direction: column; gap: 1rem; }
-.action-btn { display: block; text-align: center; background: #6f42c1; color: white; padding: 1rem; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; width: 100%; margin-bottom: 0.5rem; }
+.action-btn { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  background: #6f42c1; 
+  color: white; 
+  padding: 1rem; 
+  border-radius: 8px; 
+  text-decoration: none; 
+  font-weight: bold; 
+  border: none; 
+  cursor: pointer; 
+  width: 100%; 
+  box-sizing: border-box; 
+  font-size: 1rem; 
+  line-height: normal; 
+}
 .action-btn.secondary { background: #6c757d; }
 
 .activity-section { margin-bottom: 2rem; }
