@@ -3,11 +3,13 @@
   <div v-if="!isOnline" class="offline-banner">
     Mode Hors Ligne - Vos modifications seront synchronisées dès le retour de la connexion.
   </div>
+  <NotificationToast />
   <router-view />
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import NotificationToast from './components/NotificationToast.vue';
 
 const isOnline = ref(navigator.onLine);
 

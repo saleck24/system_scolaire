@@ -1,123 +1,156 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --primary-color: #007bff;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --gray-dark: #343a40;
+  --gray-light: #f8f9fa;
+  --text-main: #212529;
+  --bg-main: #f5f5f5;
+  --border-color: #dee2e6;
+  --white: #ffffff;
+  
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-main);
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+/* Common UI Elements */
+.btn {
+  display: inline-block;
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
   cursor: pointer;
-  transition: border-color 0.25s;
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease-in-out;
+  color: var(--white);
 }
-button:hover {
-  border-color: #646cff;
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+
+.btn-primary { background-color: var(--primary-color); }
+.btn-success { background-color: var(--success-color); }
+.btn-danger { background-color: var(--danger-color); }
+.btn-secondary { background-color: #6c757d; }
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  color: #495057;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary-color);
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .card {
-  padding: 2em;
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  padding: 1.5rem;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
+/* Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.data-table th, .data-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.data-table th {
+  background-color: var(--gray-light);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.data-table tr:hover {
+  background-color: #f1f3f5;
+}
+
+/* Badges */
+.badge {
+  padding: 0.25em 0.5em;
+  font-size: 75%;
+  font-weight: 700;
+  border-radius: 0.25rem;
+  color: var(--white);
+  text-transform: uppercase;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--white);
   padding: 2rem;
-  text-align: center;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
-/* Responsiveness for Rural Context */
-@media (max-width: 600px) {
-  .dashboard {
-    padding: 1rem !important;
-  }
-  .stats-grid {
-    flex-direction: column;
-  }
-  .grid-container {
-    flex-direction: column;
-  }
-  
-  /* Responsive Tables */
-  table, thead, tbody, th, td, tr { 
-    display: block; 
-  }
-  thead tr { 
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-  tr { border: 1px solid #ccc; margin-bottom: 1rem; }
-  td { 
-    border: none;
-    border-bottom: 1px solid #eee; 
-    position: relative;
-    padding-left: 50%; 
-    text-align: right;
-  }
-  td:before { 
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    width: 45%; 
-    padding-right: 10px; 
-    white-space: nowrap;
-    text-align: left;
-    font-weight: bold;
-  }
-  /* Labels for students table */
-  .student-table td:nth-of-type(1):before { content: "Nom"; }
-  .student-table td:nth-of-type(2):before { content: "Niveau"; }
-  .student-table td:nth-of-type(3):before { content: "Établissement"; }
-  .student-table td:nth-of-type(4):before { content: "Actions"; }
-}
+/* Utils */
+.text-center { text-align: center; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.error-text { color: var(--danger-color); font-size: 0.85rem; margin-top: 0.25rem; }

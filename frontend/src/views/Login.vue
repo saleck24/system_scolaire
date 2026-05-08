@@ -1,27 +1,27 @@
-
 <template>
   <div class="login-container">
-    <div class="login-card">
-      <h2>Connexion</h2>
+    <div class="card login-card">
+      <h2 class="text-center">Connexion</h2>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label>Email</label>
-          <input v-model="email" type="email" required />
+          <input v-model="email" type="email" placeholder="votre@email.com" required />
         </div>
         <div class="form-group">
           <label>Mot de passe</label>
-          <input v-model="password" type="password" required />
+          <input v-model="password" type="password" placeholder="••••••••" required />
         </div>
-        <button type="submit" :disabled="loading">
-          {{ loading ? 'Connexion...' : 'Se connecter' }}
+        <button type="submit" class="btn btn-primary w-100" :disabled="loading">
+          {{ loading ? 'Connexion en cours...' : 'Se connecter' }}
         </button>
-        <p v-if="error" class="error">{{ error }}</p>
-        <div class="auth-links">
-            <p class="register-link">
+        <p v-if="error" class="error-text text-center mt-2">{{ error }}</p>
+        
+        <div class="auth-links mt-2">
+            <p class="text-center small">
             Pas de compte ? <router-link to="/register">S'inscrire</router-link>
             </p>
-            <p class="forgot-link">
-            <router-link to="/forgot-password">Mot de passe oublié ?</router-link>
+            <p class="text-center small">
+            <router-link to="/forgot-password" class="text-secondary">Mot de passe oublié ?</router-link>
             </p>
         </div>
       </form>
@@ -33,6 +33,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '../stores/notification';
 import authService from '../services/authService';
 
 const email = ref('');
@@ -41,6 +42,7 @@ const loading = ref(false);
 const error = ref('');
 const router = useRouter();
 const authStore = useAuthStore();
+const notification = useNotificationStore();
 
 const handleLogin = async () => {
   loading.value = true;
@@ -48,9 +50,11 @@ const handleLogin = async () => {
   try {
     const response = await authService.login({ email: email.value, password: password.value });
     authStore.login(response.data.token, response.data.user);
+    notification.success(`Bienvenue, ${response.data.user.nom}`);
     router.push('/');
   } catch (err) {
     error.value = err.response?.data?.message || 'Erreur de connexion';
+    notification.error(error.value);
   } finally {
     loading.value = false;
   }
@@ -63,59 +67,13 @@ const handleLogin = async () => {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f5f5f5;
 }
 .login-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   width: 100%;
   max-width: 400px;
 }
-.form-group {
-  margin-bottom: 1rem;
-}
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-button:disabled {
-  background-color: #ccc;
-}
-.error {
-  color: red;
-  margin-top: 1rem;
-  text-align: center;
-}
-.auth-links {
-    margin-top: 1.5rem;
-}
-.register-link, .forgot-link {
-  margin-top: 0.5rem;
-  text-align: center;
-  font-size: 0.9rem;
-}
-.forgot-link a {
-  color: #6c757d;
-  text-decoration: none;
-}
-.forgot-link a:hover {
-  text-decoration: underline;
-}
+.w-100 { width: 100%; }
+.small { font-size: 0.9rem; }
+.text-secondary { color: #6c757d; text-decoration: none; }
+.text-secondary:hover { text-decoration: underline; }
 </style>
