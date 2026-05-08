@@ -4,3 +4,5 @@ dist/
 build/
 .vscode/
 *.log
+LICENSE
+project_analysis_report.md
