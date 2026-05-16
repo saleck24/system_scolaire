@@ -1,76 +1,85 @@
 
 <template>
-  <div class="students-container">
-    <div class="header">
-      <button @click="$router.push('/')" class="back-btn">← Retour au Tableau de bord</button>
-      <h1>Gestion des Élèves</h1>
-    </div>
-    
-    <div class="actions">
-      <button @click="openModal()" class="add-btn">Ajouter un élève</button>
-    </div>
+  <!-- MainLayout assure que la sidebar est présente sur cette page -->
+  <MainLayout>
+    <div class="students-container">
+      <div class="header">
+        <h1>Gestion des Élèves</h1>
+      </div>
+      
+      <div class="actions">
+        <button @click="openModal()" class="add-btn">Ajouter un élève</button>
+      </div>
 
-    <table class="student-table">
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Niveau</th>
-          <th>Établissement</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="student in students" :key="student.id">
-          <td>{{ student.nom }}</td>
-          <td>{{ student.niveau }}</td>
-          <td>{{ student.etablissement }}</td>
-          <td>
-            <button @click="$router.push(`/students/${student.id}`)" class="details-btn">Détails</button>
-            <button @click="openModal(student)" class="modify-btn">Modifier</button>
-            <button @click="deleteStudent(student.id)" class="delete-btn">Supprimer</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <!-- Tableau listant les élèves avec actions de modification et suppression -->
+      <table class="student-table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Niveau</th>
+            <th>Établissement</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="student in students" :key="student.id">
+            <td>{{ student.nom }}</td>
+            <td>{{ student.niveau }}</td>
+            <td>{{ student.etablissement }}</td>
+            <td>
+              <button @click="$router.push(`/students/${student.id}`)" class="details-btn">Détails</button>
+              <button @click="openModal(student)" class="modify-btn">Modifier</button>
+              <button @click="deleteStudent(student.id)" class="delete-btn">Supprimer</button>
+            </td>
+          </tr>
+          <tr v-if="students.length === 0">
+            <td colspan="4" class="text-center">Aucun élève trouvé</td>
+          </tr>
+        </tbody>
+      </table>
 
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal">
-        <h2>{{ isEditing ? 'Modifier' : 'Ajouter' }} un élève</h2>
-        <form @submit.prevent="saveStudent">
-          <div class="form-group">
-            <label>Nom</label>
-            <input v-model="form.nom" required />
-          </div>
-          <div class="form-group">
-            <label>Niveau</label>
-            <input v-model="form.niveau" required />
-          </div>
-          <div class="form-group">
-            <label>Établissement</label>
-            <input v-model="form.etablissement" required />
-          </div>
-          <div class="form-group">
-            <label>Email (pour connexion)</label>
-            <input v-model="form.email" type="email" placeholder="email@exemple.com" />
-          </div>
-          <div class="form-group">
-            <label>Mot de passe {{ isEditing ? '(laisser vide pour ne pas changer)' : '' }}</label>
-            <input v-model="form.password" type="password" />
-          </div>
-          <div class="modal-actions">
-            <button type="button" @click="closeModal">Annuler</button>
-            <button type="submit" :disabled="loading">{{ loading ? 'Sauvegarde...' : 'Enregistrer' }}</button>
-          </div>
-        </form>
+      <!-- Fenêtre modale pour l'ajout et la modification d'un élève -->
+      <div v-if="showModal" class="modal-overlay">
+        <div class="modal">
+          <h2>{{ isEditing ? 'Modifier' : 'Ajouter' }} un élève</h2>
+          <form @submit.prevent="saveStudent">
+            <div class="form-group">
+              <label>Nom</label>
+              <input v-model="form.nom" required />
+            </div>
+            <div class="form-group">
+              <label>Niveau</label>
+              <input v-model="form.niveau" required />
+            </div>
+            <div class="form-group">
+              <label>Établissement</label>
+              <input v-model="form.etablissement" required />
+            </div>
+            <div class="form-group">
+              <label>Email (pour connexion)</label>
+              <input v-model="form.email" type="email" placeholder="email@exemple.com" />
+            </div>
+            <div class="form-group">
+              <label>Mot de passe {{ isEditing ? '(laisser vide pour ne pas changer)' : '' }}</label>
+              <input v-model="form.password" type="password" />
+            </div>
+            <div class="modal-actions">
+              <button type="button" @click="closeModal">Annuler</button>
+              <button type="submit" :disabled="loading">{{ loading ? 'Sauvegarde...' : 'Enregistrer' }}</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
+  </MainLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import studentService from '../services/studentService';
+import MainLayout from '../components/MainLayout.vue'; // Import du layout principal
 
+// États réactifs pour la gestion des élèves et de l'interface
 const students = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
@@ -79,9 +88,14 @@ const loading = ref(false);
 const form = ref({
   nom: '',
   niveau: '',
-  etablissement: ''
+  etablissement: '',
+  email: '',
+  password: ''
 });
 
+/**
+ * Charge la liste des élèves depuis le serveur
+ */
 const loadStudents = async () => {
   try {
     const response = await studentService.getAll();
@@ -91,10 +105,13 @@ const loadStudents = async () => {
   }
 };
 
+/**
+ * Ouvre la modale en mode ajout ou modification
+ */
 const openModal = (student) => {
   if (student) {
     isEditing.value = true;
-    form.value = { ...student, password: '' }; // Don't show hash, allow reset
+    form.value = { ...student, password: '' };
   } else {
     isEditing.value = false;
     form.value = { nom: '', niveau: '', etablissement: '', email: '', password: '' };
@@ -102,10 +119,16 @@ const openModal = (student) => {
   showModal.value = true;
 };
 
+/**
+ * Ferme la modale
+ */
 const closeModal = () => {
   showModal.value = false;
 };
 
+/**
+ * Enregistre les modifications ou crée un nouvel élève
+ */
 const saveStudent = async () => {
   loading.value = true;
   try {
@@ -123,6 +146,9 @@ const saveStudent = async () => {
   }
 };
 
+/**
+ * Supprime un élève après confirmation
+ */
 const deleteStudent = async (id) => {
   if (confirm('Êtes-vous sûr de vouloir supprimer cet élève ?')) {
     try {
@@ -134,6 +160,7 @@ const deleteStudent = async (id) => {
   }
 };
 
+// Chargement initial des données au montage du composant
 onMounted(loadStudents);
 </script>
 

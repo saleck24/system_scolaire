@@ -1,6 +1,8 @@
-
 const db = require('../config/db');
 
+/**
+ * Enregistre une nouvelle absence pour un élève.
+ */
 exports.addAbsence = async (req, res) => {
     const { student_id, date_absence, justification } = req.body;
     try {
@@ -14,6 +16,9 @@ exports.addAbsence = async (req, res) => {
     }
 };
 
+/**
+ * Récupère l'historique des absences d'un élève.
+ */
 exports.getStudentAbsences = async (req, res) => {
     const { studentId } = req.params;
     try {

@@ -1,24 +1,34 @@
 <template>
   <div class="main-layout">
+    <!-- Barre latérale (Sidebar) - Reste fixe sur toutes les pages du tableau de bord -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <h2>Système Scolaire</h2>
       </div>
       <nav class="sidebar-nav">
+        <!-- Liens de navigation avec gestion active automatique par Vue Router -->
         <router-link to="/" class="nav-item">Tableau de bord</router-link>
+        
+        <!-- Affichage conditionnel selon le rôle de l'utilisateur -->
         <template v-if="isAdmin">
-            <router-link to="/users" class="nav-item">Utilisateurs</router-link>
+            <!-- Correction du chemin : /users -> /admin/users pour correspondre au routeur -->
+            <router-link to="/admin/users" class="nav-item">Utilisateurs</router-link>
         </template>
+        
         <template v-if="isAdmin || isTeacher">
             <router-link to="/students" class="nav-item">Élèves</router-link>
             <router-link to="/courses" class="nav-item">Cours</router-link>
         </template>
       </nav>
+      
+      <!-- Pied de page de la sidebar avec informations utilisateur et déconnexion -->
       <div class="sidebar-footer">
         <p class="user-info">{{ authStore.user?.nom }}</p>
         <button @click="logout" class="btn btn-danger btn-sm">Déconnexion</button>
       </div>
     </aside>
+    
+    <!-- Zone de contenu principal où les composants de vue sont injectés via <slot> -->
     <main class="content">
       <slot></slot>
     </main>
@@ -30,12 +40,17 @@ import { computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
 
+// Initialisation des stores et du routeur
 const authStore = useAuthStore();
 const router = useRouter();
 
+// Définition des rôles pour l'affichage conditionnel dans le template
 const isAdmin = computed(() => authStore.user?.role === 'admin');
 const isTeacher = computed(() => authStore.user?.role === 'enseignant');
 
+/**
+ * Déconnexion de l'utilisateur et redirection vers la page de login
+ */
 const logout = () => {
   authStore.logout();
   router.push('/login');

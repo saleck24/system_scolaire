@@ -1,5 +1,8 @@
 const db = require('../config/db');
 
+/**
+ * Récupère la liste de tous les cours et supports disponibles.
+ */
 exports.getAllCourses = async (req, res) => {
     try {
         const [courses] = await db.query('SELECT * FROM courses');
@@ -9,6 +12,9 @@ exports.getAllCourses = async (req, res) => {
     }
 };
 
+/**
+ * Récupère les détails d'un cours par son identifiant.
+ */
 exports.getCourseById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -20,6 +26,9 @@ exports.getCourseById = async (req, res) => {
     }
 };
 
+/**
+ * Crée un nouveau cours et enregistre le fichier téléversé.
+ */
 exports.createCourse = async (req, res) => {
     const { titre, type } = req.body;
     try {
@@ -38,9 +47,13 @@ exports.createCourse = async (req, res) => {
     }
 };
 
+/**
+ * Supprime un cours de la base de données.
+ */
 exports.deleteCourse = async (req, res) => {
     const { id } = req.params;
     try {
+        // Note : En production, il faudrait aussi supprimer le fichier physique sur le disque
         await db.query('DELETE FROM courses WHERE id = ?', [id]);
         res.json({ message: 'Cours supprimé' });
     } catch (error) {

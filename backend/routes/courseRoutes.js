@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/courseController');
-const auth = require('../middleware/authMiddleware');
-
 const upload = require('../middleware/uploadMiddleware');
 
-router.get('/', auth, courseController.getAllCourses);
-router.get('/:id', auth, courseController.getCourseById);
-router.post('/', auth, upload.single('file'), courseController.createCourse);
-router.delete('/:id', auth, courseController.deleteCourse);
+/**
+ * Routes pour la gestion des cours et supports pédagogiques
+ */
+
+router.get('/', courseController.getAllCourses);        // Liste des cours
+router.get('/:id', courseController.getCourseById);     // Détails d'un cours
+router.post('/', upload.single('file'), courseController.createCourse); // Téléversement d'un cours
+router.delete('/:id', courseController.deleteCourse);   // Suppression d'un cours
 
 module.exports = router;

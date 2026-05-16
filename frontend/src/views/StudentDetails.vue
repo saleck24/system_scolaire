@@ -1,50 +1,56 @@
 
 <template>
-  <div class="details-container" v-if="student">
-    <div class="header">
-      <button @click="$router.push('/students')" class="back-btn">Retour</button>
-      <h1>Détails de {{ student.nom }}</h1>
-    </div>
-    <p>Niveau: {{ student.niveau }} | Établissement: {{ student.etablissement }}</p>
-
-    <div v-if="alerts.length" class="alerts-section">
-      <div v-for="(alert, idx) in alerts" :key="idx" :class="['alert', alert.severity]">
-        {{ alert.message }}
+  <!-- Utilisation du MainLayout pour maintenir la sidebar visible -->
+  <MainLayout>
+    <div class="details-container" v-if="student">
+      <div class="header">
+        <button @click="$router.push('/students')" class="back-btn">Retour</button>
+        <h1>Détails de {{ student.nom }}</h1>
       </div>
-    </div>
+      <p>Niveau: {{ student.niveau }} | Établissement: {{ student.etablissement }}</p>
 
-    <div class="sections">
-      <div class="section">
-        <h2>Notes (Moyenne: {{ moyenne }})</h2>
-        <form @submit.prevent="addNote" class="inline-form">
-          <input v-model="newNote.matiere" placeholder="Matière" required />
-          <input v-model="newNote.note" type="number" step="0.5" placeholder="Note" required />
-          <input v-model="newNote.periode" placeholder="Période" required />
-          <button type="submit">Ajouter</button>
-        </form>
-        <ul>
-          <li v-for="grade in grades" :key="grade.id">
-            {{ grade.matiere }}: {{ grade.note }} ({{ grade.periode }})
-          </li>
-        </ul>
+      <!-- Affichage des alertes de performance/comportement générées par le moteur de règles -->
+      <div v-if="alerts.length" class="alerts-section">
+        <div v-for="(alert, idx) in alerts" :key="idx" :class="['alert', alert.severity]">
+          {{ alert.message }}
+        </div>
       </div>
 
-      <div class="section">
-        <h2>Absences</h2>
-        <form @submit.prevent="addAbsence" class="inline-form">
-          <input v-model="newAbsence.date_absence" type="date" required />
-          <input v-model="newAbsence.justification" placeholder="Justification" />
-          <button type="submit">Noter Absence</button>
-        </form>
-        <ul>
-          <li v-for="absence in absences" :key="absence.id">
-            {{ new Date(absence.date_absence).toLocaleDateString() }} - {{ absence.justification || 'Non justifiée' }}
-          </li>
-        </ul>
+      <div class="sections">
+        <!-- Section de gestion des notes -->
+        <div class="section">
+          <h2>Notes (Moyenne: {{ moyenne }})</h2>
+          <form @submit.prevent="addNote" class="inline-form">
+            <input v-model="newNote.matiere" placeholder="Matière" required />
+            <input v-model="newNote.note" type="number" step="0.5" placeholder="Note" required />
+            <input v-model="newNote.periode" placeholder="Période" required />
+            <button type="submit">Ajouter</button>
+          </form>
+          <ul>
+            <li v-for="grade in grades" :key="grade.id">
+              {{ grade.matiere }}: {{ grade.note }} ({{ grade.periode }})
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section de gestion des absences -->
+        <div class="section">
+          <h2>Absences</h2>
+          <form @submit.prevent="addAbsence" class="inline-form">
+            <input v-model="newAbsence.date_absence" type="date" required />
+            <input v-model="newAbsence.justification" placeholder="Justification" />
+            <button type="submit">Noter Absence</button>
+          </form>
+          <ul>
+            <li v-for="absence in absences" :key="absence.id">
+              {{ new Date(absence.date_absence).toLocaleDateString() }} - {{ absence.justification || 'Non justifiée' }}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
-  <div v-else>Chargement...</div>
+    <div v-else>Chargement...</div>
+  </MainLayout>
 </template>
 
 <script setup>
@@ -54,9 +60,13 @@ import studentService from '../services/studentService';
 import performanceService from '../services/performanceService';
 import absenceService from '../services/absenceService';
 import ruleEngine from '../services/ruleEngine';
+import MainLayout from '../components/MainLayout.vue'; // Layout principal
 
+// Récupération des paramètres de route
 const route = useRoute();
 const studentId = Number(route.params.id);
+
+// États réactifs pour les données de l'élève
 const student = ref(null);
 const grades = ref([]);
 const moyenne = ref(0);
@@ -66,28 +76,34 @@ const alerts = ref([]);
 const newNote = ref({ matiere: '', note: '', periode: '' });
 const newAbsence = ref({ date_absence: '', justification: '' });
 
+/**
+ * Charge toutes les données relatives à l'élève (infos, notes, absences, alertes)
+ */
 const loadData = async () => {
   try {
-    // Load Student
+    // Informations de base
     const sRes = await studentService.getById(studentId);
     student.value = sRes.data;
 
-    // Load Grades
+    // Notes et moyenne
     const pRes = await performanceService.getByStudent(studentId);
     grades.value = pRes.data.grades;
     moyenne.value = pRes.data.moyenne;
 
-    // Load Absences
+    // Absences
     const aRes = await absenceService.getByStudent(studentId);
     absences.value = aRes.data; 
 
-    // Run Rules
+    // Analyse via le moteur de règles pour générer des alertes
     alerts.value = await ruleEngine.analyze(studentId);
   } catch (error) {
     console.error('Erreur chargement données:', error);
   }
 };
 
+/**
+ * Ajoute une nouvelle note
+ */
 const addNote = async () => {
   try {
     await performanceService.add({ ...newNote.value, student_id: studentId });
@@ -98,6 +114,9 @@ const addNote = async () => {
   }
 };
 
+/**
+ * Ajoute une absence
+ */
 const addAbsence = async () => {
   try {
     await absenceService.add({ ...newAbsence.value, student_id: studentId });
@@ -108,6 +127,7 @@ const addAbsence = async () => {
   }
 };
 
+// Initialisation au montage
 onMounted(loadData);
 </script>
 

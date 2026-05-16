@@ -1,4 +1,5 @@
 <template>
+  <!-- MainLayout maintient la barre latérale active -->
   <MainLayout>
     <div class="user-management">
       <div class="header-actions mb-2">
@@ -6,10 +7,12 @@
           <button @click="openModal()" class="btn btn-success">Ajouter un utilisateur</button>
       </div>
 
+      <!-- Filtre de recherche par nom ou email -->
       <div class="table-controls mb-2">
           <input v-model="searchQuery" placeholder="Rechercher par nom ou email..." class="search-input" />
       </div>
 
+      <!-- Liste des utilisateurs (Enseignants et Admins) -->
       <div class="card p-0">
           <table class="data-table">
             <thead>
@@ -28,6 +31,7 @@
                    <span :class="['badge', user.role === 'admin' ? 'btn-secondary' : 'btn-info']">{{ user.role }}</span>
                 </td>
                 <td>
+                  <!-- On ne peut pas supprimer son propre compte -->
                   <button @click="confirmDelete(user)" class="btn btn-danger btn-sm" v-if="user.id !== currentUserId">Supprimer</button>
                 </td>
               </tr>
@@ -38,6 +42,7 @@
           </table>
       </div>
 
+      <!-- Modale de création/édition d'utilisateur -->
       <div v-if="showModal" class="modal-overlay">
         <div class="modal-content">
           <h2>{{ editingUser ? 'Modifier' : 'Ajouter' }} un utilisateur</h2>
@@ -82,15 +87,18 @@ import { useAuthStore } from '../stores/auth';
 import { useNotificationStore } from '../stores/notification';
 import MainLayout from '../components/MainLayout.vue';
 
+// États réactifs
 const users = ref([]);
 const showModal = ref(false);
 const loading = ref(false);
 const searchQuery = ref('');
 const editingUser = ref(null);
+
 const authStore = useAuthStore();
 const notification = useNotificationStore();
 const currentUserId = computed(() => authStore.user?.id);
 
+// Formulaire réactif
 const form = ref({
   nom: '',
   email: '',
@@ -98,6 +106,9 @@ const form = ref({
   role: 'enseignant'
 });
 
+/**
+ * Filtrage des utilisateurs en fonction de la recherche
+ */
 const filteredUsers = computed(() => {
     return users.value.filter(u => 
         u.nom.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
@@ -105,6 +116,9 @@ const filteredUsers = computed(() => {
     );
 });
 
+/**
+ * Chargement de la liste des utilisateurs
+ */
 const loadUsers = async () => {
   try {
     const res = await api.get('/users');
@@ -114,6 +128,9 @@ const loadUsers = async () => {
   }
 };
 
+/**
+ * Ouvre la modale
+ */
 const openModal = (user = null) => {
     if (user) {
         editingUser.value = user;
@@ -125,10 +142,16 @@ const openModal = (user = null) => {
     showModal.value = true;
 };
 
+/**
+ * Ferme la modale
+ */
 const closeModal = () => {
   showModal.value = false;
 };
 
+/**
+ * Sauvegarde les données utilisateur
+ */
 const saveUser = async () => {
   loading.value = true;
   try {
@@ -148,8 +171,10 @@ const saveUser = async () => {
   }
 };
 
+/**
+ * Supprime un utilisateur après confirmation
+ */
 const confirmDelete = async (user) => {
-  // Replacement for browser confirm (simplified for this step, could be a custom modal)
   if (confirm(`Voulez-vous vraiment supprimer l'utilisateur ${user.nom} ?`)) {
     try {
       await api.delete(`/users/${user.id}`);
@@ -161,6 +186,7 @@ const confirmDelete = async (user) => {
   }
 };
 
+// Montage du composant
 onMounted(loadUsers);
 </script>
 

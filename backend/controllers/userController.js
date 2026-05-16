@@ -1,6 +1,9 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 
+/**
+ * Récupère tous les utilisateurs (Admins et Enseignants).
+ */
 exports.getAllUsers = async (req, res) => {
     try {
         const [users] = await db.query('SELECT id, nom, email, role, last_active FROM users');
@@ -10,6 +13,9 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
+/**
+ * Supprime un utilisateur de la base de données.
+ */
 exports.deleteUser = async (req, res) => {
     const { id } = req.params;
     try {
@@ -20,6 +26,9 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
+/**
+ * Crée un nouvel utilisateur (généralement par un admin).
+ */
 exports.createUser = async (req, res) => {
     const { nom, email, password, role } = req.body;
     try {
@@ -36,6 +45,9 @@ exports.createUser = async (req, res) => {
     }
 };
 
+/**
+ * Liste les utilisateurs considérés comme actifs (dernière activité il y a moins de 15 min).
+ */
 exports.getOnlineUsers = async (req, res) => {
     try {
         const [users] = await db.query('SELECT id, nom, email, role, last_active FROM users WHERE last_active > NOW() - INTERVAL 15 MINUTE');
@@ -46,6 +58,9 @@ exports.getOnlineUsers = async (req, res) => {
     }
 };
 
+/**
+ * Statistiques globales d'activité pour le tableau de bord admin.
+ */
 exports.getOnlineStats = async (req, res) => {
     try {
         const [onlineUsers] = await db.query(
@@ -69,6 +84,9 @@ exports.getOnlineStats = async (req, res) => {
     }
 };
 
+/**
+ * Permet à un utilisateur de changer son mot de passe actuel.
+ */
 exports.changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     try {

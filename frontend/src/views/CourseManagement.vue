@@ -1,4 +1,5 @@
 <template>
+  <!-- MainLayout assure la persistance de la barre latérale -->
   <MainLayout>
     <div class="course-management">
       <div class="header-actions mb-2">
@@ -6,10 +7,12 @@
           <button @click="openModal()" class="btn btn-success">Ajouter un cours</button>
       </div>
 
+      <!-- Barre de recherche pour filtrer les cours par titre -->
       <div class="table-controls mb-2">
           <input v-model="searchQuery" placeholder="Rechercher par titre..." class="search-input" />
       </div>
 
+      <!-- Tableau des cours disponibles -->
       <div class="card p-0">
           <table class="data-table">
             <thead>
@@ -27,6 +30,7 @@
                    <span :class="['badge', getTypeBadgeClass(course.type)]">{{ course.type }}</span>
                 </td>
                 <td>
+                  <!-- Lien pour ouvrir/télécharger le fichier associé -->
                   <a :href="getFileUrl(course.file_url)" target="_blank" class="btn btn-secondary btn-sm">Ouvrir</a>
                 </td>
                 <td>
@@ -40,6 +44,7 @@
           </table>
       </div>
 
+      <!-- Modale de téléversement d'un nouveau cours -->
       <div v-if="showModal" class="modal-overlay">
         <div class="modal-content">
           <h2>Ajouter un cours</h2>
@@ -80,6 +85,7 @@ import courseService from '../services/courseService';
 import { useNotificationStore } from '../stores/notification';
 import MainLayout from '../components/MainLayout.vue';
 
+// États réactifs
 const courses = ref([]);
 const showModal = ref(false);
 const loading = ref(false);
@@ -92,22 +98,34 @@ const form = ref({
 });
 const selectedFile = ref(null);
 
+/**
+ * Filtrage dynamique des cours
+ */
 const filteredCourses = computed(() => {
     return courses.value.filter(c => 
         c.titre.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 });
 
+/**
+ * Gère la sélection de fichier
+ */
 const handleFileChange = (e) => {
     selectedFile.value = e.target.files[0];
 };
 
+/**
+ * Construit l'URL complète pour accéder au fichier sur le backend
+ */
 const getFileUrl = (url) => {
     if (!url) return '#';
     const backendUrl = 'http://localhost:3000';
     return url.startsWith('/uploads') ? `${backendUrl}${url}` : url;
 };
 
+/**
+ * Retourne la classe CSS du badge selon le type de cours
+ */
 const getTypeBadgeClass = (type) => {
     switch(type) {
         case 'pdf': return 'btn-warning';
@@ -117,6 +135,9 @@ const getTypeBadgeClass = (type) => {
     }
 };
 
+/**
+ * Charge les cours depuis l'API
+ */
 const loadCourses = async () => {
   try {
     const res = await courseService.getAll();
@@ -126,16 +147,25 @@ const loadCourses = async () => {
   }
 };
 
+/**
+ * Initialise et ouvre la modale
+ */
 const openModal = () => {
     form.value = { titre: '', type: 'pdf' };
     selectedFile.value = null;
     showModal.value = true;
 };
 
+/**
+ * Ferme la modale
+ */
 const closeModal = () => {
   showModal.value = false;
 };
 
+/**
+ * Enregistre le cours (envoi en multipart/form-data)
+ */
 const saveCourse = async () => {
   if (!selectedFile.value) {
       notification.info('Veuillez sélectionner un fichier');
@@ -148,9 +178,7 @@ const saveCourse = async () => {
     formData.append('type', form.value.type);
     formData.append('file', selectedFile.value);
 
-    await courseService.create(formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    await courseService.create(formData);
     notification.success('Cours ajouté avec succès');
     await loadCourses();
     closeModal();
@@ -161,6 +189,9 @@ const saveCourse = async () => {
   }
 };
 
+/**
+ * Supprime un cours après confirmation
+ */
 const confirmDelete = async (course) => {
   if (confirm(`Voulez-vous supprimer le cours "${course.titre}" ?`)) {
     try {
@@ -173,6 +204,7 @@ const confirmDelete = async (course) => {
   }
 };
 
+// Cycle de vie
 onMounted(loadCourses);
 </script>
 

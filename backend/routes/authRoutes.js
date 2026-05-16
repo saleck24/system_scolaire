@@ -3,9 +3,13 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
-router.post('/register', authController.register);
-router.post('/login', authController.login);
-router.post('/forgot-password', authController.forgotPassword);
-router.post('/reset-password', authController.resetPassword);
+/**
+ * Routes pour l'authentification et la gestion du compte
+ */
+
+router.post('/register', authController.register); // Inscription
+router.post('/login', authController.login);       // Connexion
+router.post('/forgot-password', authController.forgotPassword); // Mot de passe oublié
+router.post('/reset-password', authController.resetPassword);   // Réinitialisation
 
 module.exports = router;
